@@ -12,6 +12,11 @@
         "webpack"
     ],
     "author": "hqw",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/huangpiaofighting/hqw-cli-father"
+    },
+    "homepage": "https://github.com/huangpiaofighting/hqw-cli-father",
     "license": "ISC",
     "dependencies": {
         "@babel/core": "^7.13.15",
