@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+
+const { welcome, getVersion, argv } = require('hqw-util/lib/cli');
+const { printError } = require('hqw-util/lib/cli/console');
+const crossSpawn = require('hqw-util/lib/cli/crossSpawn');
+const package = require('./package.json');
+const _ = require('lodash');
+
+getVersion(package);
+if (argv['v']) {
+  process.exit(0);
+}
+const optionList = argv['_'];
+const commonFun = () => {
+  const result = crossSpawn.sync(
+    process.execPath,
+    [].concat(require.resolve('./src/' + optionList[0])),
+    { stdio: 'inherit' }
+  );
+  if (result.signal) {
+    printError('构建失败');
+    process.exit(1);
+  }
+};
+const config = [
+  {
+    name: 'dev',
+    func: commonFun,
+  },
+  {
+    name: 'pro',
+    func: commonFun,
+  },
+  {
+    name: 'getnpmroot',
+    func: () => {
+      const result = crossSpawn.sync('npm', ['root', '-g'], {
+        stdio: 'inherit',
+      });
+      if (result.signal) {
+        printError('构建失败');
+        process.exit(1);
+      }
+    },
+  },
+  {
+    name: 'fabric',
+    func: () => {
+      require('./src/fabric');
+    },
+  },
+];
+
+if (_.map(config, (item) => item.name).includes(optionList[0])) {
+  welcome(`hqwfa  ${optionList[0]}`);
+  if (optionList.includes('debugger')) {
+    require('./src/' + optionList[0]);
+  } else {
+    let findOp = _.find(config, (item) => item.name == optionList[0]);
+    if (findOp) {
+      findOp.func();
+    } else {
+      printError('指令不存在,请使用 hqwfa dev 或者 hqwfa pro');
+    }
+  }
+} else {
+  printError('指令不存在,请使用 hqwfa dev 或者 hqwfa pro');
+  process.exit(0);
+}
